@@ -76,6 +76,7 @@ internal actual class SynchronizedObject actual constructor() {
     private val monitor: NativeMonitor get() = monitorWrapper.monitor
 
     fun lock() {
+        LockStats.lockCount++
         if (owner.value == currentThreadId()) {
             reEnterCount += 1
         } else if (waiters.incrementAndGet() > 1) {
@@ -88,6 +89,7 @@ internal actual class SynchronizedObject actual constructor() {
     }
 
     private fun waitForUnlockAndLock() {
+        LockStats.nativeLockCount++
         withMonitor(monitor) {
             while (!owner.compareAndSet(NO_OWNER, currentThreadId())) {
                 wait()
@@ -137,6 +139,7 @@ internal actual class SynchronizedObject actual constructor() {
             require(pthread_mutexattr_init(attr.ptr) == 0)
             require (pthread_mutexattr_settype(attr.ptr, PTHREAD_MUTEX_ERRORCHECK) == 0)
             require(pthread_mutex_init(mutex.ptr, attr.ptr) == 0)
+            LockStats.mutexAllocationCount++
         }
 
         fun enter() = require(pthread_mutex_lock(mutex.ptr) == 0)
@@ -148,6 +151,7 @@ internal actual class SynchronizedObject actual constructor() {
         fun notify() = require (pthread_cond_signal(cond.ptr) == 0)
 
         fun dispose() {
+            LockStats.mutexDeallocationCount++
             pthread_cond_destroy(cond.ptr)
             pthread_mutex_destroy(mutex.ptr)
             pthread_mutexattr_destroy(attr.ptr)
