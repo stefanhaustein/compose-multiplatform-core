@@ -29,4 +29,6 @@ object LockStats {
         mutexAllocationCount = 0
         mutexDeallocationCount = 0
     }
+
+    override fun toString() = "count: $lockCount nativeCount: $nativeLockCount allocCount: $mutexAllocationCount deallocCount: $mutexDeallocationCount"
 }

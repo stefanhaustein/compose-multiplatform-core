@@ -64,6 +64,7 @@ internal expect val PTHREAD_MUTEX_ERRORCHECK: Int
  */
 internal actual class SynchronizedObject actual constructor() {
 
+
     companion object {
         private const val NO_OWNER = -1L
     }
